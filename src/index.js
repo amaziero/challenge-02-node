@@ -10,19 +10,74 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  
+  const user = users.find(user => user.username === username);
+
+  if(!user) {
+    return response
+      .status(404)
+      .json({ error: "Please provide a valid username!" });
+  }
+
+  request.user = user;
+  return next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+
+  const todoQuantity = user.todos.length;
+  const planTrueIfProTrue = user.pro;
+  
+  if(todoQuantity >= 10 ) {
+    if(!planTrueIfProTrue) {
+      return response.status(403)
+    }
+  }
+
+  request.user = user;
+  return next();
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  const user = users.find(user => user.username === username);
+  if(!user) {
+    return response
+      .status(404)
+      .json({ error: "Please provide a valid username!" });
+  }
+
+  if(!validate(id)) {
+    return response.status(400)
+  }
+
+  const fundTodo = user.todos.find((todos) => todos.id === id);
+  if(!fundTodo) {
+    return response.status(404)
+  }
+
+  request.user = user;
+  request.todo = fundTodo;
+
+  return next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+
+  const user = users.find((user) => user.id === id);
+
+  if(!user) {
+    return response.status(404)
+  }
+
+  request.user = user;
+
+  return next();
 }
 
 app.post('/users', (request, response) => {
